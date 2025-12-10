@@ -64,4 +64,26 @@ public class GridManager : MonoBehaviour
         return null;
         
     }
+
+    public List<Tile> GetNeighbors(Tile tile)
+    {
+        List<Tile> result = new List<Tile>();
+
+        Vector2 pos = tile.transform.position;
+        Vector2[] dirs = new Vector2[]
+        {
+            new Vector2(1,0),
+            new Vector2(0,1),
+            new Vector2(-1,0),
+            new Vector2(0,-1)
+        };
+
+        foreach(var dir in dirs)
+        {
+            var n = GetTileInPosition(pos + dir);
+            if (n != null) result.Add(n);
+        }
+
+        return result;
+    }
 }

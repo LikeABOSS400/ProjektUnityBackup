@@ -56,6 +56,8 @@ public abstract class Tile : MonoBehaviour
             {
                 SetUnit(UnitsManager.Instance.selectedPlayer);
                 UnitsManager.Instance.SetSelectedPlayer(null);
+
+                GameManager.Instance.ChangeState(GameState.EnemyTurn);
             }
         }
     }

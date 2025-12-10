@@ -6,6 +6,8 @@ public class UnitsManager : MonoBehaviour
 {
     public static UnitsManager Instance;
     private List<ScriptableUnits> units;
+    public List<BaseEnemy> enemies = new List<BaseEnemy>();
+    public List<BasePlayer> players = new List<BasePlayer>();
 
     public BasePlayer selectedPlayer;
     private void Awake()
@@ -24,6 +26,7 @@ public class UnitsManager : MonoBehaviour
             var spawnedPlayer = Instantiate(randomPrefab);
             var randomSpawnTile = GridManager.Instance.GetPlayerSpawnTile();
 
+            players.Add(spawnedPlayer);
             randomSpawnTile.SetUnit(spawnedPlayer);
         }
         GameManager.Instance.ChangeState(GameState.SpawnEnemies);
@@ -39,6 +42,7 @@ public class UnitsManager : MonoBehaviour
             var spawnedEnemy = Instantiate(randomPrefab);
             var randomSpawnTile = GridManager.Instance.GetEnemySpawnTile();
 
+            enemies.Add(spawnedEnemy);
             randomSpawnTile.SetUnit(spawnedEnemy);
         }
         GameManager.Instance.ChangeState(GameState.PlayerTurn);

@@ -102,4 +102,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitName: blue
   OccupiedTile: {fileID: 0}
-  Faction: 0
+  Faction: 1

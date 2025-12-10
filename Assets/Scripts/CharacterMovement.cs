@@ -5,7 +5,7 @@ using UnityEngine;
 public class CharacterMovement : MonoBehaviour
 {
     [SerializeField] private bool canMove = true;
-    [Tooltip(("If your character does not jump, ignore all below 'Jumping Character'"))]
+    [Tooltip(("If your character does not jump, ignore all below 'Jumping' Character"))]
     [SerializeField] private bool doesCharacterJump = false;
 
     [Header("Base / Root")]
@@ -29,12 +29,13 @@ public class CharacterMovement : MonoBehaviour
     private bool jump;
 
     private bool facingRight = true;
-
-   
     private Vector3 velocity = Vector3.zero;
 
     PlayerInput input;
     Controls controls = new Controls();
+    
+    // 
+    private Vector3 charDefaultRelPos, baseDefPos; 
 
     // Start is called before the first frame update
     private void Awake()
@@ -42,6 +43,11 @@ public class CharacterMovement : MonoBehaviour
         input = GetComponent<PlayerInput>();
     }
 
+    private void Start()
+    {
+        charDefaultRelPos = charRB.transform.localPosition;
+    }
+    
     private void Update()
     {
         controls = input.GetInput();
@@ -55,10 +61,10 @@ public class CharacterMovement : MonoBehaviour
     {
         Move();
     }
-
+    
     private void Move()
     {
-        if (!onBase && doesCharacterJump)
+        if (!onBase && doesCharacterJump && charRB.linearVelocity.y < 0)
         {
             detectBase();
         }
@@ -69,34 +75,56 @@ public class CharacterMovement : MonoBehaviour
 
             Vector2 _velocity = Vector3.SmoothDamp(baseRB.linearVelocity, targetVelocity, ref velocity, movementSmooth);
             baseRB.linearVelocity = _velocity;
-
-
+ 
             //----- 
             if (doesCharacterJump)
             {
                 if (onBase)
                 {
-                    // on base
-                    charRB.linearVelocity = _velocity;
+                    
+                    // charRB.velocity = baseRB.velocity;
+                    charRB.linearVelocity = Vector2.zero;
+                    
+                    // vertical check
+                    if (charRB.transform.localPosition != charDefaultRelPos)
+                    {
+                        var charTransform = charRB.transform;
+                        charTransform.localPosition = new Vector2(charTransform.localPosition.x,
+                            charDefaultRelPos.y);
+                    }
                 }
                 else
                 {
-                    // in air
-                    if (charRB.linearVelocity.y < 0)
-                    {
-                        charRB.gravityScale = fallingGravityScale;
-                    }
-
+                    // falling
+                    // if (charRB.velocity.y < 0)
+                    // {
+                    //     // charRB.gravityScale = fallingGravityScale;
+                    // }
+                    // else
+                    // { // moving upward from jump
+                    //     // charRB.gravityScale = jumpingGravityScale;
+                    // }
+                
                     charRB.linearVelocity = new Vector2(_velocity.x, charRB.linearVelocity.y);
                 }
 
                 if (jump)
                 {
+                    charRB.isKinematic = false;
                     charRB.AddForce(Vector2.up * jumpVal, ForceMode2D.Impulse);
                     charRB.gravityScale = jumpingGravityScale;
                     jump = false;
                     currentJumps++;
                     onBase = false;
+                }
+                
+                // --- horizontal position check
+                if (charRB.transform.localPosition != charDefaultRelPos)
+                {
+                    print("pos diff- local: " + charRB.transform.localPosition + "  --default: " + charDefaultRelPos );
+                    var charTransform = charRB.transform;
+                    charTransform.localPosition = new Vector2(charDefaultRelPos.x,
+                        charTransform.localPosition.y);
                 }
             }
             // --- 
@@ -120,12 +148,15 @@ public class CharacterMovement : MonoBehaviour
 
     private void detectBase()
     {
-
         RaycastHit2D hit = Physics2D.Raycast(jumpDetector.position, -Vector2.up, detectionDistance, detectLayer);
         if(hit.collider != null)
         {
             onBase = true;
+            charRB.isKinematic = true;
             currentJumps = 0;
+            // charRB.velocity = Vector2.zero;
+            // baseRB.velocity = Vector2.zero;
+            Debug.Log("setting velocity to zero");
         }
     }
 
